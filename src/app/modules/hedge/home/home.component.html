@@ -1,0 +1,68 @@
+<section>
+  <form [formGroup]="form" fxLayout="column">
+    <div>
+      <span>I want to get an hedge of </span>
+      <mat-form-field appearance="{{ fieldAppearance }}">
+        <mat-label>Amount</mat-label>
+        <input matInput placeholder="100" [formControl]="form.get('amount')" />
+        <span matSuffix>€</span>
+      </mat-form-field>
+
+      <span>against frost (less than 2°C during 24h) at </span>
+
+      <mat-autocomplete #auto="matAutocomplete">
+        <mat-option
+          *ngFor="let option of filteredOptions | async"
+          [value]="option"
+        >
+          {{ option }}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-form-field appearance="{{ fieldAppearance }}">
+        <mat-label>Location</mat-label>
+        <input
+          type="text"
+          placeholder="Search for a location..."
+          aria-label="Location"
+          matInput
+          [formControl]="form.get('location')"
+          [matAutocomplete]="auto"
+        />
+      </mat-form-field>
+
+      <span>(with a maximum radius of 50 km) on this period of time: </span>
+
+      <mat-form-field appearance="{{ fieldAppearance }}">
+        <mat-label>Start date</mat-label>
+        <input matInput [matDatepicker]="pickerStart" />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="pickerStart"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #pickerStart></mat-datepicker>
+      </mat-form-field>
+
+      <span> - </span>
+
+      <mat-form-field appearance="{{ fieldAppearance }}">
+        <mat-label>End date</mat-label>
+        <input matInput [matDatepicker]="pickerEnd" />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="pickerEnd"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #pickerEnd></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <button
+      fxFlex
+      fxFlexAlign="center"
+      mat-raised-button
+      color="primary"
+      (click)="submit()"
+    >
+      Generate a contract and get my QR Code
+    </button>
+  </form>
+</section>
