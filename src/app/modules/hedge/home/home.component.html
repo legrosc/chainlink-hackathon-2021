@@ -1,5 +1,5 @@
-<section>
-  <form [formGroup]="form" fxLayout="column">
+<section fxLayout="column">
+  <form [formGroup]="form">
     <div>
       <span>I want to get an hedge of </span>
       <mat-form-field appearance="{{ fieldAppearance }}">
@@ -54,15 +54,19 @@
         <mat-datepicker #pickerEnd></mat-datepicker>
       </mat-form-field>
     </div>
-
-    <button
-      fxFlex
-      fxFlexAlign="center"
-      mat-raised-button
-      color="primary"
-      (click)="submit()"
-    >
-      Generate a contract and get my QR Code
-    </button>
   </form>
+
+  <app-ol-map
+    fxFlexAlign="center"
+    (clickEvent)="fillAddress($event)"
+  ></app-ol-map>
+
+  <button
+    fxFlexAlign="center"
+    mat-raised-button
+    color="primary"
+    (click)="submit()"
+  >
+    Generate a contract and get my QR Code
+  </button>
 </section>
