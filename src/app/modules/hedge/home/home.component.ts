@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
-import { OSMCoordinate } from 'src/app/core/services/models/osm-coordinate';
-import { OSMSearchResult } from 'src/app/core/services/models/osm-search-result';
-import { NominatimService } from 'src/app/core/services/nominatim.service';
+import { OSMCoordinate } from '@services/nominatim/models/osm-coordinate';
+import { OSMSearchResult } from '@services/nominatim/models/osm-search-result';
+import { NominatimService } from '@services/nominatim/nominatim.service';
+import { Web3Service } from '@services/web3/web3.service';
 
 @Component({
   templateUrl: './home.component.html',
@@ -19,7 +20,8 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private readonly formBuilder: FormBuilder,
-    private readonly nominatimService: NominatimService
+    private readonly nominatimService: NominatimService,
+    private readonly web3Service: Web3Service
   ) {
     this.form = formBuilder.group({
       amount: [null, Validators.required],
@@ -37,6 +39,14 @@ export class HomeComponent implements OnInit {
       switchMap((value: string) => this.nominatimService.search(value)),
       map((result: OSMSearchResult[]) => result.map((r) => r.display_name))
     );
+
+    this.web3Service
+      .getAccounts()
+      .then((value) => console.log('Got accounts:', value));
+
+    this.web3Service
+      .getGreeting()
+      .then((value) => console.log('Got greeting:', value));
   }
 
   private filterLocations(value: string): string[] {

@@ -14,6 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 const modules = [
   MatButtonModule,
@@ -29,6 +30,7 @@ const modules = [
   MatSelectModule,
   MatToolbarModule,
   MatTooltipModule,
+  MatSnackBarModule,
 ];
 
 @NgModule({

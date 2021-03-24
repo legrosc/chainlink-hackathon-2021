@@ -14,7 +14,7 @@ import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import Zoom from 'ol/control/Zoom';
 import MousePosition from 'ol/control/MousePosition';
-import { OSMCoordinate } from 'src/app/core/services/models/osm-coordinate';
+import { OSMCoordinate } from '@services/nominatim/models/osm-coordinate';
 
 @Component({
   selector: 'app-ol-map',

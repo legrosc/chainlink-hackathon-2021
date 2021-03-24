@@ -9,15 +9,19 @@
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
     "target": "es2015",
     "module": "es2020",
-    "lib": [
-      "es2018",
-      "dom"
-    ]
+    "lib": ["es2018", "dom"],
+    "paths": {
+      "@contracts/*": ["./hardhat/artifacts/contracts/*"],
+      "@services/*": ["./src/app/core/services/*"]
+    }
   },
   "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictTemplates": true
   }
 }
