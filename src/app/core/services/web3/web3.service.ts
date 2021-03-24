@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BigNumber, Contract, ethers, Signer } from 'ethers';
 import contractArtifact from '@contracts/Greeter.sol/Greeter.json';
+import { Greeter } from 'hardhat/typechain/Greeter';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,7 @@ export class Web3Service {
     | ethers.providers.JsonRpcProvider
     | ethers.providers.Web3Provider;
   private readonly signer: Signer;
-  private readonly contract: Contract;
+  private readonly contract: Greeter;
 
   constructor() {
     let allowMetamask: boolean = false;
@@ -24,7 +25,7 @@ export class Web3Service {
       this.provider = new ethers.providers.JsonRpcProvider();
     }
     this.signer = this.provider.getSigner();
-    this.contract = new Contract(
+    this.contract = new Greeter(
       '0x5FbDB2315678afecb367f032d93F642f64180aa3',
       contractArtifact.abi,
       this.provider
@@ -49,11 +50,11 @@ export class Web3Service {
     });
   }
 
-  public getGreeting(): Promise<ethers.providers.TransactionResponse> {
+  public getGreeting(): Promise<string> {
     return this.contract.greet();
   }
 
-  public setGreeting(): Promise<ethers.providers.TransactionResponse> {
+  public setGreeting(): Promise<ethers.ContractTransaction> {
     const contractWithSigner = this.contract.connect(this.signer);
     return contractWithSigner.setGreeting('Hola');
   }
