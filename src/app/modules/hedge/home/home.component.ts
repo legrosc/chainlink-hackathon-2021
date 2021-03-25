@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { debounceTime, startWith, switchMap } from 'rxjs/operators';
 import { OSMCoordinate } from '@services/nominatim/models/osm-coordinate';
 import { OSMSearchResult } from '@services/nominatim/models/osm-search-result';
 import { NominatimService } from '@services/nominatim/nominatim.service';
@@ -14,7 +14,7 @@ import { FocusPoint } from 'src/app/shared/ol-map/models/focus-point';
 })
 export class HomeComponent implements OnInit {
   form: FormGroup;
-  filteredOptions: Observable<string[]>;
+  filteredOptions: Observable<OSMSearchResult[]>;
 
   fieldAppearance: 'standard' | 'fill' | 'outline' = 'outline';
 
@@ -39,8 +39,7 @@ export class HomeComponent implements OnInit {
     this.filteredOptions = this.form.get('location').valueChanges.pipe(
       startWith(''),
       debounceTime(500),
-      switchMap((value: string) => this.nominatimService.search(value)),
-      map((result: OSMSearchResult[]) => result.map((r) => r.display_name))
+      switchMap((value: string) => this.nominatimService.search(value))
     );
 
     this.web3Service
@@ -62,7 +61,7 @@ export class HomeComponent implements OnInit {
       .toPromise();
 
     this.form.patchValue({
-      location: result.display_name,
+      location: result,
     });
 
     this.mapFocus = new FocusPoint(
@@ -71,5 +70,21 @@ export class HomeComponent implements OnInit {
     );
 
     this.cd.detectChanges();
+  }
+
+  public async setOnMap(selectedAddress: OSMSearchResult) {
+    this.mapFocus = new FocusPoint(
+      new OSMCoordinate(
+        parseFloat(selectedAddress.lat),
+        parseFloat(selectedAddress.lon)
+      ),
+      10
+    );
+
+    this.cd.detectChanges();
+  }
+
+  public getAddressLabel(selectedValue: OSMSearchResult) {
+    return selectedValue.display_name;
   }
 }

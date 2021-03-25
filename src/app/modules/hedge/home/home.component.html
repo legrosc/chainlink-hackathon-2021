@@ -10,12 +10,16 @@
 
       <span>against frost (less than 2°C during 24h) in </span>
 
-      <mat-autocomplete #auto="matAutocomplete">
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        (optionSelected)="setOnMap($event.option.value)"
+        [displayWith]="getAddressLabel"
+      >
         <mat-option
           *ngFor="let option of filteredOptions | async"
           [value]="option"
         >
-          {{ option }}
+          {{ option.display_name }}
         </mat-option>
       </mat-autocomplete>
       <mat-form-field appearance="{{ fieldAppearance }}">
