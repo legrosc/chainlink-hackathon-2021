@@ -14,4 +14,5 @@ export class OSMSearchResult {
   public place_id: string;
   public svg: string;
   public type: string;
+  public error: string | undefined;
 }

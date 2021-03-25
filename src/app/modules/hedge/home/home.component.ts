@@ -60,6 +60,11 @@ export class HomeComponent implements OnInit {
       .reverseGeocode(coordinate)
       .toPromise();
 
+    if (result.error) {
+      // Address not found: do nothing
+      return;
+    }
+
     this.form.patchValue({
       location: result,
     });
