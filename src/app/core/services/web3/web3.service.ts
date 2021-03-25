@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BigNumber, Contract, ethers, Signer } from 'ethers';
-import contractArtifact from '@contracts/Greeter.sol/Greeter.json';
+import * as contractArtifact from '@contracts/Greeter.sol/Greeter.json';
 import { Greeter } from 'hardhat/typechain/Greeter';
 
 @Injectable({
@@ -25,11 +25,11 @@ export class Web3Service {
       this.provider = new ethers.providers.JsonRpcProvider();
     }
     this.signer = this.provider.getSigner();
-    this.contract = new Greeter(
+    this.contract = new Contract(
       '0x5FbDB2315678afecb367f032d93F642f64180aa3',
       contractArtifact.abi,
       this.provider
-    );
+    ) as Greeter;
   }
 
   public getAccounts(): Promise<string[]> {
