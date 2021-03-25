@@ -71,7 +71,7 @@ export class HomeComponent implements OnInit {
 
     this.mapFocus = new FocusPoint(
       new OSMCoordinate(parseFloat(result.lat), parseFloat(result.lon)),
-      10
+      9
     );
 
     this.cd.detectChanges();
@@ -83,7 +83,7 @@ export class HomeComponent implements OnInit {
         parseFloat(selectedAddress.lat),
         parseFloat(selectedAddress.lon)
       ),
-      10
+      9
     );
 
     this.cd.detectChanges();
