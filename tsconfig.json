@@ -18,7 +18,8 @@
       "@contracts/*": ["./hardhat/artifacts/contracts/*"],
       "@services/*": ["./src/app/core/services/*"]
     },
-    "strict": false
+    "strict": false,
+    "noImplicitAny": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

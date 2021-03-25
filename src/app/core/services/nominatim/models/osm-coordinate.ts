@@ -1,8 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
 
 export class OSMCoordinate {
-  lat: number;
-  lon: number;
+  public constructor(public lat: number = 0, public lon: number = 0) {}
 
   public static FromMapCoordinates(coordinate: Coordinate): OSMCoordinate {
     return {

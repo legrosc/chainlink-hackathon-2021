@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
@@ -6,6 +6,7 @@ import { OSMCoordinate } from '@services/nominatim/models/osm-coordinate';
 import { OSMSearchResult } from '@services/nominatim/models/osm-search-result';
 import { NominatimService } from '@services/nominatim/nominatim.service';
 import { Web3Service } from '@services/web3/web3.service';
+import { FocusPoint } from 'src/app/shared/ol-map/models/focus-point';
 
 @Component({
   templateUrl: './home.component.html',
@@ -13,15 +14,17 @@ import { Web3Service } from '@services/web3/web3.service';
 })
 export class HomeComponent implements OnInit {
   form: FormGroup;
-  options = ['Paris', 'London', 'Madrid'];
   filteredOptions: Observable<string[]>;
 
   fieldAppearance: 'standard' | 'fill' | 'outline' = 'outline';
 
+  mapFocus: FocusPoint = new FocusPoint();
+
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly nominatimService: NominatimService,
-    private readonly web3Service: Web3Service
+    private readonly web3Service: Web3Service,
+    private cd: ChangeDetectorRef
   ) {
     this.form = formBuilder.group({
       amount: [null, Validators.required],
@@ -49,12 +52,6 @@ export class HomeComponent implements OnInit {
       .then((value) => console.log('Got greeting:', value));
   }
 
-  private filterLocations(value: string): string[] {
-    return this.options.filter((option) =>
-      option.toLowerCase().includes(value.toLowerCase())
-    );
-  }
-
   public submit(): void {
     console.log('submit: ', this.form.value);
   }
@@ -68,6 +65,11 @@ export class HomeComponent implements OnInit {
       location: result.display_name,
     });
 
-    // TODO: On location change, zoom on the map + draw the 50km radius circle
+    this.mapFocus = new FocusPoint(
+      new OSMCoordinate(parseFloat(result.lat), parseFloat(result.lon)),
+      10
+    );
+
+    this.cd.detectChanges();
   }
 }
