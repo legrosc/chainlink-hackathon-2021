@@ -1,61 +1,131 @@
-import { Injectable } from '@angular/core';
-import { BigNumber, Contract, ethers, Signer } from 'ethers';
+import { Injectable, NgZone } from '@angular/core';
+import { Contract, ethers, Signer } from 'ethers';
 import * as contractArtifact from '@contracts/Greeter.sol/Greeter.json';
 import { Greeter } from 'hardhat/typechain/Greeter';
+import detectEthereumProvider from '@metamask/detect-provider';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { ProviderConnectInfo, ProviderRpcError } from 'hardhat/types';
+import { Account } from './models/account';
+import {
+  errorCodes,
+  ethErrors,
+  getMessageFromCode,
+  serializeError,
+} from 'eth-rpc-errors';
+import { SerializedEthereumRpcError } from 'eth-rpc-errors/dist/classes';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Web3Service {
-  private readonly provider:
-    | ethers.providers.JsonRpcProvider
-    | ethers.providers.Web3Provider;
-  private readonly signer: Signer;
-  private readonly contract: Greeter;
+  private provider: ethers.providers.Web3Provider;
+  private signer: Signer;
+  private contract: Greeter;
 
-  constructor() {
-    let allowMetamask: boolean = false;
-    if (!!(window as any).ethereum && allowMetamask) {
-      // Metamask
-      this.provider = new ethers.providers.Web3Provider(
-        (window as any).ethereum
-      );
-    } else {
-      // Local ethereum node on default port (8545)
-      this.provider = new ethers.providers.JsonRpcProvider();
-    }
-    this.signer = this.provider.getSigner();
-    this.contract = new Contract(
-      '0x5FbDB2315678afecb367f032d93F642f64180aa3',
-      contractArtifact.abi,
-      this.provider
-    ) as Greeter;
-  }
+  private hasMetamaskSubject$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    false
+  );
+  /**
+   * Indicates if Metamask is installed in the browser.
+   */
+  public hasMetamask$: Observable<boolean> = this.hasMetamaskSubject$.asObservable();
 
-  public getAccounts(): Promise<string[]> {
-    return this.provider.listAccounts();
-  }
+  private currentAccountSubject$: BehaviorSubject<Account | null> = new BehaviorSubject<Account | null>(
+    null
+  );
+  /**
+   * The current connected Metamask account. If null, the user is not connected.
+   */
+  public currentAccount$: Observable<Account | null> = this.currentAccountSubject$.asObservable();
 
-  public getAccountBalance(account: string): Promise<BigNumber> {
-    return this.provider.getBalance(account);
-  }
+  constructor(private zone: NgZone) {}
 
-  public send(
-    to: string,
-    amount: string
-  ): Promise<ethers.providers.TransactionResponse> {
-    return this.signer.sendTransaction({
-      to: to,
-      value: ethers.utils.parseEther(amount),
+  /**
+   * Initialize the connection to the blockchain, through Metamask.
+   */
+  public async connectToWeb3(): Promise<void> {
+    const metamaskProvider: any = await detectEthereumProvider({
+      mustBeMetaMask: true,
     });
+    if (metamaskProvider) {
+      this.hasMetamaskSubject$.next(true);
+      this.provider = new ethers.providers.Web3Provider(metamaskProvider);
+
+      // Check if the user is already connected
+      await this.handleAccountsChanged(await this.provider.listAccounts());
+
+      // Register event listeners
+      metamaskProvider.on('connect', (connectInfo: ProviderConnectInfo) =>
+        // TODO: handle connection
+        console.log('Connected to chain')
+      );
+      metamaskProvider.on('disconnect', (error: ProviderRpcError) =>
+        // TODO: handle disconnection
+        console.log('Disconnected from chain')
+      );
+      metamaskProvider.on('accountsChanged', (accounts: string[]) =>
+        this.zone.run(() => this.handleAccountsChanged(accounts))
+      );
+      metamaskProvider.on('chainChanged', (chainId: string) =>
+        this.zone.run(() => this.handleChainChanged(chainId))
+      );
+
+      // Create the contract
+      this.contract = new Contract(
+        '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+        contractArtifact.abi,
+        this.provider
+      ) as Greeter;
+    } else {
+      throw new Error('Metamask is not installed.');
+    }
   }
 
-  public getGreeting(): Promise<string> {
-    return this.contract.greet();
+  private handleChainChanged(chainId: string) {
+    window.location.reload();
   }
 
-  public setGreeting(): Promise<ethers.ContractTransaction> {
-    const contractWithSigner = this.contract.connect(this.signer);
-    return contractWithSigner.setGreeting('Hola');
+  private async handleAccountsChanged(accounts: string[]): Promise<void> {
+    if (accounts.length === 0) {
+      // Reset the account
+      this.signer = null;
+      this.currentAccountSubject$.next(null);
+    } else {
+      this.signer = this.provider.getSigner();
+      this.currentAccountSubject$.next(
+        new Account(
+          await this.signer.getAddress(),
+          await this.signer.getBalance()
+        )
+      );
+    }
+  }
+
+  /**
+   * Prompt the user to connect his Metamask account to the app.
+   * @returns A promise with the address of the connected account.
+   * @throws {SerializedEthereumRpcError}
+   */
+  public async connectMetamask(): Promise<void> {
+    try {
+      let accounts: string[] = await this.provider.send(
+        'eth_requestAccounts',
+        []
+      );
+      this.handleAccountsChanged(accounts);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  private handleError(error: ProviderRpcError): SerializedEthereumRpcError {
+    // Make sure the error is spec compliant
+    const serializedError: SerializedEthereumRpcError = serializeError(error);
+
+    if (serializedError.code !== errorCodes.provider.userRejectedRequest) {
+      console.error(getMessageFromCode(serializedError.code));
+    }
+
+    throw serializedError;
   }
 }

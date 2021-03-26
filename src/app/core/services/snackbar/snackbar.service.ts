@@ -12,4 +12,11 @@ export class SnackbarService {
       duration: 2000,
     });
   }
+
+  public showError(message: string): void {
+    this.snackBar.open(message, '', {
+      duration: 2000,
+      panelClass: 'error',
+    });
+  }
 }

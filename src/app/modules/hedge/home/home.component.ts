@@ -23,10 +23,9 @@ export class HomeComponent implements OnInit {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly nominatimService: NominatimService,
-    private readonly web3Service: Web3Service,
     private cd: ChangeDetectorRef
   ) {
-    this.form = formBuilder.group({
+    this.form = this.formBuilder.group({
       amount: [null, Validators.required],
       risk: ['', Validators.required],
       location: ['', Validators.required],
@@ -41,14 +40,6 @@ export class HomeComponent implements OnInit {
       debounceTime(500),
       switchMap((value: string) => this.nominatimService.search(value))
     );
-
-    this.web3Service
-      .getAccounts()
-      .then((value) => console.log('Got accounts:', value));
-
-    this.web3Service
-      .getGreeting()
-      .then((value) => console.log('Got greeting:', value));
   }
 
   public submit(): void {
