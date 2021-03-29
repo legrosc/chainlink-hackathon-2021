@@ -121,4 +121,13 @@ export class Web3Service {
 
     throw serializedError;
   }
+
+  /**
+   * Request an update of the current account's balance.
+   */
+  public async updateAccountBalance(): Promise<void> {
+    let currentAccount: Account = this.currentAccountSubject$.value;
+    currentAccount.balance = await this.signer.getBalance();
+    this.currentAccountSubject$.next(currentAccount);
+  }
 }

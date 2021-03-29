@@ -11,8 +11,7 @@
     "hh:compile": "cd hardhat && npx hardhat compile",
     "hh:start": "cd hardhat && npx hardhat node",
     "hh:deploy": "cd hardhat && npx hardhat run scripts/sample-script.ts --network localhost",
-    "hh:test": "cd hardhat && npx hardhat test",
-    "postinstall": "typechain"
+    "hh:test": "cd hardhat && npx hardhat test"
   },
   "private": true,
   "dependencies": {

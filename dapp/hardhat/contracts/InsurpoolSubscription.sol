@@ -47,7 +47,7 @@ contract InsurpoolSubscription {
         holders[msg.sender] = policyHolder;
         holderAddresses.push(msg.sender);
 
-        emit InsuranceFundsUpdated(address(this).balance + msg.value);
+        emit InsuranceFundsUpdated(address(this).balance);
     }
 
     function checkInsurancePayout() external {

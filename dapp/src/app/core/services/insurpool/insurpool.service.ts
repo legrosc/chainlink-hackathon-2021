@@ -42,8 +42,12 @@ export class InsurpoolService {
     this.contract.on(
       this.contract.filters.InsuranceFundsUpdated(null),
       (newValue: BigNumberish) => {
-        console.log('Someone updated the funds');
+        console.log(
+          'Someone updated the funds:',
+          ethers.utils.formatEther(newValue)
+        );
         this.updateInsuranceFund(newValue);
+        this.web3service.updateAccountBalance();
       }
     );
   }
@@ -54,6 +58,10 @@ export class InsurpoolService {
     } else {
       const balance = await this.web3service.provider.getBalance(
         this.contract.address
+      );
+      console.log(
+        'getting initial contract balance: ',
+        ethers.utils.formatEther(balance)
       );
       this.insuranceFundSubject$.next(ethers.utils.formatEther(balance));
     }
