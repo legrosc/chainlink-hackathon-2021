@@ -1,0 +1,14 @@
+mat-form-field {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+app-ol-map {
+  width: 80%;
+  height: 400px;
+  padding-bottom: 1rem;
+}
+
+section {
+  padding: 1rem;
+}
