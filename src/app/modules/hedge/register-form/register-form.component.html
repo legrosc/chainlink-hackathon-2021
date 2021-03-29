@@ -1,0 +1,95 @@
+<section fxLayout="column">
+  <form [formGroup]="form">
+    <div>
+      <span>I want to get an hedge of </span>
+      <mat-form-field appearance="{{ fieldAppearance }}">
+        <mat-label>Amount</mat-label>
+        <input matInput placeholder="100" [formControl]="form.get('amount')" />
+        <span matSuffix>ETH</span>
+      </mat-form-field>
+
+      <span>against</span>
+
+      <mat-form-field>
+        <mat-select placeholder="Weather" [formControl]="form.get('weather')">
+          <mat-option *ngFor="let weather of weatherValues" [value]="weather">
+            {{ weatherName(weather) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <span>{{ weatherDescription(form.get("weather").value) }} in </span>
+
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        (optionSelected)="setOnMap($event.option.value)"
+        [displayWith]="getAddressLabel"
+      >
+        <mat-option
+          *ngFor="let option of filteredOptions | async"
+          [value]="option"
+        >
+          {{ option.display_name }}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-form-field appearance="{{ fieldAppearance }}">
+        <mat-label>Location</mat-label>
+        <input
+          type="text"
+          placeholder="Search for a location..."
+          aria-label="Location"
+          matInput
+          [formControl]="form.get('location')"
+          [matAutocomplete]="auto"
+        />
+      </mat-form-field>
+
+      <span>(with a maximum radius of 50 km) on this period of time: </span>
+
+      <mat-form-field appearance="{{ fieldAppearance }}">
+        <mat-label>Start date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="pickerStart"
+          [formControl]="form.get('startDate')"
+        />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="pickerStart"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #pickerStart></mat-datepicker>
+      </mat-form-field>
+
+      <span> - </span>
+
+      <mat-form-field appearance="{{ fieldAppearance }}">
+        <mat-label>End date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="pickerEnd"
+          [formControl]="form.get('endDate')"
+        />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="pickerEnd"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #pickerEnd></mat-datepicker>
+      </mat-form-field>
+    </div>
+  </form>
+
+  <app-ol-map
+    fxFlexAlign="center"
+    [focusPoint]="mapFocus"
+    (clickEvent)="fillAddress($event)"
+  ></app-ol-map>
+
+  <button
+    fxFlexAlign="center"
+    mat-raised-button
+    color="primary"
+    (click)="submit()"
+  >
+    Register
+  </button>
+</section>

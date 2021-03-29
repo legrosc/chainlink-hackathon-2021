@@ -20,7 +20,7 @@
       "@services/*": ["./src/app/core/services/*"]
     },
     "strict": false,
-    "noImplicitAny": true
+    "noImplicitAny": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

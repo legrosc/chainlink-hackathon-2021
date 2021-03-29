@@ -9,9 +9,11 @@ import { MaterialModule } from '../../shared/material/material.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { OlMapModule } from '../../shared/ol-map/ol-map.module';
 import { HeaderComponent } from './header/header.component';
+import { RegisterFormComponent } from './register-form/register-form.component';
+import { InsuranceCounterComponent } from './insurance-counter/insurance-counter.component';
 
 @NgModule({
-  declarations: [HomeComponent, HeaderComponent],
+  declarations: [HomeComponent, HeaderComponent, RegisterFormComponent, InsuranceCounterComponent],
   imports: [
     CommonModule,
     HedgeRoutingModule,
