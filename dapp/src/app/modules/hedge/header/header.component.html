@@ -1,0 +1,20 @@
+<header>
+  <mat-toolbar fxLayout="row" fxLayoutAlign="space-between center">
+    <span>Hedge Me</span>
+    <ng-container *ngIf="(currentAccount$ | async) == null; else signerInfo">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="connectMetamask()"
+        [disabled]="!(hasMetamask$ | async)"
+        [matTooltip]="(hasMetamask$ | async) ? '' : 'Please install Metamask.'"
+      >
+        Connect with MetaMask
+      </button>
+    </ng-container>
+    <ng-template #signerInfo>
+      {{ (currentAccount$ | async).address }} -
+      {{ (currentAccount$ | async).balanceInEth }} ETH
+    </ng-template>
+  </mat-toolbar>
+</header>
