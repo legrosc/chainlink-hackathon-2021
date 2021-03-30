@@ -2,7 +2,7 @@
 
 This is the repository for the HedgeMeNow dapp, created for Chainlink's 2021 Hackathon.  
 
-Our deck: https://drive.google.com/file/d/1x1WtHwV9dIFaD6niACOmeEULMh7JnBvO/view?usp=sharing
+The deck of the project: https://drive.google.com/file/d/15FbzNV1zLsSo0zBg3kR0dc5ni9HxLooN/view?usp=sharing
 
 ![Proof of concept](docs/poc.jpg)  
   
