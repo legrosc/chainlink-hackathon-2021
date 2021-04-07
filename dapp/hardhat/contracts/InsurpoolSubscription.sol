@@ -2,8 +2,14 @@
 pragma solidity ^0.8.3;
 import "hardhat/console.sol";
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./EvaluatorInterface.sol";
+
 /// @title Handle subscriptions to the Insurpool service
-contract InsurpoolSubscription {
+contract InsurpoolSubscription is Ownable {
+    address private evaluator;
+    EvaluatorInterface private evaluatorInstance;
+
     // Max duration of the insurance in days
     uint256 immutable maxDuration;
     // Minimum ether value required to register to the insurance
@@ -12,9 +18,9 @@ contract InsurpoolSubscription {
     enum Weather {Drought, Frost}
 
     struct PolicyHolder {
-        uint256 start;
-        uint256 duration;
-        uint256 amount;
+        int256 start;
+        int256 duration;
+        int256 amount;
         int256 latitude;
         int256 longitude;
         Weather weather;
@@ -28,6 +34,11 @@ contract InsurpoolSubscription {
     constructor(uint256 _maxDuration, uint256 _minEthValue) {
         maxDuration = _maxDuration;
         minEthValue = _minEthValue;
+    }
+
+    function setEvaluatorAddress(address _address) public onlyOwner {
+        evaluator = _address;
+        evaluatorInstance = EvaluatorInterface(evaluator);
     }
 
     function register(uint256 amount, PolicyHolder calldata policyHolder)
@@ -51,6 +62,7 @@ contract InsurpoolSubscription {
     }
 
     function checkInsurancePayout() external {
+        evaluatorInstance.requestWeather(_start, _lon, _lat);
         bool[] memory needInsuranceResults = new bool[](holderAddresses.length);
         uint256 needInsuranceCount = 0;
         for (uint256 i = 0; i < holderAddresses.length; i++) {
@@ -77,6 +89,7 @@ contract InsurpoolSubscription {
         returns (bool needsInsurance_)
     {
         PolicyHolder storage policyHolder = holders[policyHolderAddress];
+        // TODO: check with the oracle here
         return policyHolder.weather == Weather.Drought;
     }
 }
