@@ -27,7 +27,7 @@ contract Evaluator is ChainlinkClient {
      */
     constructor() public {
         setPublicChainlinkToken();
-        oracle = 0xAA1DC356dc4B18f30C347798FD5379F3D77ABC5b;
+        oracle = 0x3F5527271be1101ef53791324Fb8F6172582135a;
         jobId = "235f8b1eeb364efc83c26d0bef2d0c01";
         fee = 0.1 * 10**18;
     }
