@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Web3Service } from '@services/web3/web3.service';
 import { BigNumberish, Contract, ethers } from 'ethers';
-import { InsurpoolSubscription } from 'hardhat/typechain';
-import * as contractArtifact from '@contracts/InsurpoolSubscription.sol/InsurpoolSubscription.json';
+import * as contractArtifact from '@contracts/HedgeMe.sol/HedgeMe.json';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { PolicyHolder } from 'src/app/modules/hedge/models/policy-holder';
 import { filter } from 'rxjs/operators';
+import { HedgeMe } from 'hardhat/typechain/HedgeMe';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
-export class InsurpoolService {
-  private readonly contractAddress: string =
-    '0x5fbdb2315678afecb367f032d93f642f64180aa3';
-  private contract: InsurpoolSubscription;
+export class HedgeMeService {
+  private readonly contractAddress: string = environment.contractAddress;
+  private contract: HedgeMe;
 
   private insuranceFundSubject$: BehaviorSubject<string> = new BehaviorSubject<string>(
     '0'
@@ -37,7 +37,7 @@ export class InsurpoolService {
       this.contractAddress,
       contractArtifact.abi,
       this.web3service.signer
-    ) as InsurpoolSubscription;
+    ) as HedgeMe;
 
     this.contract.on(
       this.contract.filters.InsuranceFundsUpdated(null),

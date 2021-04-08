@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { BigNumberish } from '@ethersproject/bignumber';
-import { InsurpoolService } from '@services/insurpool/insurpool.service';
+import { HedgeMeService } from '@services/hedge-me/hedge-me.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -12,9 +12,9 @@ import { Observable } from 'rxjs';
 export class InsuranceCounterComponent implements OnInit {
   public insuranceFund$: Observable<BigNumberish>;
 
-  constructor(private readonly insurpoolService: InsurpoolService) {}
+  constructor(private readonly hedgeMeService: HedgeMeService) {}
 
   ngOnInit(): void {
-    this.insuranceFund$ = this.insurpoolService.insuranceFund$;
+    this.insuranceFund$ = this.hedgeMeService.insuranceFund$;
   }
 }

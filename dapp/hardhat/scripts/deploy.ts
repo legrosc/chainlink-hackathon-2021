@@ -13,15 +13,13 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  // Deploy Insurpool
-  const insurpoolfactory = await ethers.getContractFactory(
-    'InsurpoolSubscription'
-  );
-  const insurpool = await insurpoolfactory.deploy(30, 1);
+  // Deploy HedgeMe
+  const hedgeMeFactory = await ethers.getContractFactory('HedgeMe');
+  const hedgeMe = await hedgeMeFactory.deploy(30, 1);
 
-  await insurpool.deployed();
+  await hedgeMe.deployed();
 
-  console.log('Insurpool deployed to:', insurpool.address);
+  console.log('HedgeMe deployed to:', hedgeMe.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

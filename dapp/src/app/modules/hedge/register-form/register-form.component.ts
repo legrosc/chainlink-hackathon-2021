@@ -5,7 +5,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { InsurpoolService } from '@services/insurpool/insurpool.service';
+import { HedgeMeService } from '@services/hedge-me/hedge-me.service';
 import { OSMCoordinate } from '@services/nominatim/models/osm-coordinate';
 import { OSMSearchResult } from '@services/nominatim/models/osm-search-result';
 import { NominatimService } from '@services/nominatim/nominatim.service';
@@ -39,7 +39,7 @@ export class RegisterFormComponent implements OnInit {
     formBuilder: FormBuilder,
     private readonly nominatimService: NominatimService,
     private cd: ChangeDetectorRef,
-    private readonly insurpoolService: InsurpoolService
+    private readonly hedgeMeService: HedgeMeService
   ) {
     this.form = new PolicyHolderRegistrationForm(formBuilder);
   }
@@ -63,7 +63,7 @@ export class RegisterFormComponent implements OnInit {
       weather: this.form.weather,
     };
     console.log('submit value: ', policyHolder);
-    await this.insurpoolService.register(policyHolder);
+    await this.hedgeMeService.register(policyHolder);
   }
 
   public async fillAddress(coordinate: OSMCoordinate): Promise<void> {
