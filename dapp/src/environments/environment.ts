@@ -5,6 +5,8 @@
 export const environment = {
   production: false,
   contractAddress: '0x86db60032ce497915235d5874a73ed9df5ecbb3d',
+  oracleAddres: '0x3F5527271be1101ef53791324Fb8F6172582135a',
+  jobId: '235f8b1eeb364efc83c26d0bef2d0c01',
 };
 
 /*

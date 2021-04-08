@@ -92,4 +92,11 @@ export class HedgeMeService {
       value: policyHolder.amount,
     });
   }
+
+  public async setContractOracle(): Promise<void> {
+    await this.contract.setOracleAddress(
+      environment.oracleAddres,
+      ethers.utils.toUtf8Bytes(environment.jobId)
+    );
+  }
 }

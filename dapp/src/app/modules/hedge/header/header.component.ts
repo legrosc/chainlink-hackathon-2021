@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { HedgeMeService } from '@services/hedge-me/hedge-me.service';
 import { SnackbarService } from '@services/snackbar/snackbar.service';
 import { Account } from '@services/web3/models/account';
 import { Web3Service } from '@services/web3/web3.service';
@@ -20,7 +21,8 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private readonly web3Service: Web3Service,
-    private readonly snackbarService: SnackbarService
+    private readonly snackbarService: SnackbarService,
+    private readonly hedgeMeService: HedgeMeService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -45,5 +47,9 @@ export class HeaderComponent implements OnInit {
         this.snackbarService.showError('An error occured while connecting.');
       }
     }
+  }
+
+  public async setOracle(): Promise<void> {
+    await this.hedgeMeService.setContractOracle();
   }
 }
