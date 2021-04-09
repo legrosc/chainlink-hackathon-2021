@@ -7,19 +7,19 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title Handle insurance deposits and payements for the HedgeMe service.
 contract HedgeMe is Ownable, ChainlinkClient {
-    // Max duration of the insurance in days
-    uint256 immutable maxDuration;
-    // Minimum ether value required to register to the insurance
+    // Minimum ether value (in wei) required to register to the insurance
     uint256 immutable minEthValue;
+    // Minimum number of days that needs to be at the specified temperature for the insurance to trigger
+    uint256 immutable minDaysValue;
 
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
 
     mapping(bytes32 => address) public requests;
-    mapping(address => int256) public results;
+    mapping(address => uint256) public results;
 
-    enum Weather {Drought, Frost}
+    enum Weather {Frost, Drought}
 
     struct PolicyHolder {
         uint256 start;
@@ -34,12 +34,17 @@ contract HedgeMe is Ownable, ChainlinkClient {
     address[] private holderAddresses;
 
     event InsuranceFundsUpdated(uint256 newFund);
+    event PaidInsurance(address to, uint256 amount);
 
-    constructor(uint256 _maxDuration, uint256 _minEthValue) {
-        maxDuration = _maxDuration;
+    constructor(uint256 _minEthValue, address _link) {
         minEthValue = _minEthValue;
+        minDaysValue = 4;
 
-        setPublicChainlinkToken();
+        if (_link == address(0)) {
+            setPublicChainlinkToken();
+        } else {
+            setChainlinkToken(_link);
+        }
         fee = 0.1 * 10**18;
     }
 
@@ -58,12 +63,7 @@ contract HedgeMe is Ownable, ChainlinkClient {
         // Check that the right value was sent
         require(msg.value == amount, "The wrong amount was sent.");
         // Check that the sent value is valid
-        require(msg.value >= minEthValue, "At least 0.001 ether must be sent.");
-        // Check that the duration is valid
-        require(
-            policyHolder.duration <= maxDuration * 1 days,
-            "The duration is too long."
-        );
+        require(msg.value >= minEthValue, "Not enough Ether provided.");
 
         holders[msg.sender] = policyHolder;
         holderAddresses.push(msg.sender);
@@ -71,17 +71,31 @@ contract HedgeMe is Ownable, ChainlinkClient {
         emit InsuranceFundsUpdated(address(this).balance);
     }
 
+    // Returns the number of days where the payement of insurance is needed
     function needsInsurance(address policyHolderAddress)
         private
         view
-        returns (bool needsInsurance_)
+        returns (uint256 needsInsuranceDaysCount_)
     {
         PolicyHolder storage policyHolder = holders[policyHolderAddress];
-        // TODO: parse result ?
-        int256 temp = results[policyHolderAddress];
-        return
-            (policyHolder.weather == Weather.Drought && temp > 50) ||
-            (policyHolder.weather == Weather.Frost && temp < 0);
+        uint256 temp = results[policyHolderAddress];
+        uint256[] memory daysTemp = parseLastSevenDaysTemperatures(temp);
+        uint256 daysCount = 0;
+
+        for (uint256 i = 0; i < 7; i++) {
+            // 323K =~ 50°C
+            // 273K =~ 0°C
+            if (
+                (policyHolder.weather == Weather.Drought &&
+                    daysTemp[i] > 323) ||
+                (policyHolder.weather == Weather.Frost && daysTemp[i] < 273)
+            ) {
+                daysCount++;
+            }
+        }
+
+        console.log("Number of days where insurance is needed: %s", daysCount);
+        return daysCount;
     }
 
     /**
@@ -93,6 +107,7 @@ contract HedgeMe is Ownable, ChainlinkClient {
         int256 _lon,
         int256 _lat
     ) public {
+        console.log("Sending weather request to Oracle...");
         Chainlink.Request memory req =
             buildChainlinkRequest(
                 jobId,
@@ -109,20 +124,24 @@ contract HedgeMe is Ownable, ChainlinkClient {
     /**
      * Callback function
      */
-    function fulfillWeather(bytes32 _requestId, int256 _result)
+    function fulfillWeather(bytes32 _requestId, uint256 _result)
         public
         recordChainlinkFulfillment(_requestId)
         onlyOracle
     {
+        console.log("Receiving the request result...");
         address policyHolderAddress = requests[_requestId];
         results[policyHolderAddress] = _result;
         delete requests[_requestId];
 
         // Check if the policyHolder needs insurance
-        // For now let's say insurance == 1 eth
-        uint256 insurance = 1 ether;
-        if (needsInsurance(policyHolderAddress)) {
+        // For now let's say dailyAmount == 1 eth
+        uint256 dailyAmount = 1 ether;
+        uint256 insuranceNeededDaysCount = needsInsurance(policyHolderAddress);
+        if (insuranceNeededDaysCount > 0) {
+            uint256 insurance = dailyAmount * insuranceNeededDaysCount;
             payable(policyHolderAddress).transfer(insurance);
+            emit PaidInsurance(policyHolderAddress, insurance);
         }
     }
 
@@ -132,5 +151,19 @@ contract HedgeMe is Ownable, ChainlinkClient {
             "You are not authorized to call this function."
         );
         _;
+    }
+
+    function parseLastSevenDaysTemperatures(uint256 value)
+        public
+        pure
+        returns (uint256[] memory)
+    {
+        uint256 divider = 1;
+        uint256[] memory daysTemp = new uint256[](7);
+        for (uint256 i = 0; i < 7; i++) {
+            daysTemp[i] = (value / divider) % 1000;
+            divider *= 1000;
+        }
+        return daysTemp;
     }
 }
