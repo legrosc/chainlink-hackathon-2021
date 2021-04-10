@@ -173,7 +173,7 @@ describe('HedgeMe', function () {
     const temperatures = ethers.BigNumber.from('263273278253271272267');
     await mockOracle.fulfillOracleRequest(requestId, temperatures);
 
-    // Check that we received the insurance
+    // Check that we received the insurance (4 days at a daily amount of 0.2 ethers == 1 ether)
     let transferedAmount: BigNumber = await new Promise<BigNumber>(
       (resolve) => {
         contract.on(
@@ -185,8 +185,12 @@ describe('HedgeMe', function () {
       }
     );
 
-    expect(transferedAmount.toHexString()).to.equal(
-      ethers.constants.WeiPerEther.mul(5).toHexString()
+    expect(transferedAmount.toString()).to.equal(
+      ethers.utils.parseEther('1').toString()
     );
+
+    afterBalance = await ethers.provider.getBalance(wallets[0].address);
+    difference = beforeBalance.sub(afterBalance);
+    expect(difference.isNegative()).to.be.true;
   });
 });

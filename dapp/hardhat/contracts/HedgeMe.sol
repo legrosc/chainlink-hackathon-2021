@@ -135,11 +135,15 @@ contract HedgeMe is Ownable, ChainlinkClient {
         delete requests[_requestId];
 
         // Check if the policyHolder needs insurance
-        // For now let's say dailyAmount == 1 eth
-        uint256 dailyAmount = 1 ether;
+        // For now let's use a fixed dailyAmount
+        uint256 dailyAmount = 0.2 ether;
         uint256 insuranceNeededDaysCount = needsInsurance(policyHolderAddress);
-        if (insuranceNeededDaysCount > 0) {
-            uint256 insurance = dailyAmount * insuranceNeededDaysCount;
+        uint256 insurance = dailyAmount * insuranceNeededDaysCount;
+        if (
+            insuranceNeededDaysCount > 0 && address(this).balance >= insurance
+        ) {
+            console.log("This balance: %s", address(this).balance);
+            console.log("Paying insurance with value %s...", insurance);
             payable(policyHolderAddress).transfer(insurance);
             emit PaidInsurance(policyHolderAddress, insurance);
         }
