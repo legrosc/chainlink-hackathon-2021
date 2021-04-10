@@ -15,7 +15,15 @@
     <ng-template #signerInfo>
       {{ (currentAccount$ | async).address }} -
       {{ (currentAccount$ | async).balanceInEth }} ETH
-      <button (click)="setOracle()">Set oracle</button>
+      <button mat-button color="primary" (click)="setOracle()">
+        Set oracle
+      </button>
+      <button mat-button color="primary" (click)="requestWeather()">
+        Request weather
+      </button>
+      <button mat-button color="primary" (click)="fund()">
+        Fund contract with link
+      </button>
     </ng-template>
   </mat-toolbar>
 </header>

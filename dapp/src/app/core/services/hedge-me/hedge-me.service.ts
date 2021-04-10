@@ -7,6 +7,7 @@ import { PolicyHolder } from 'src/app/modules/hedge/models/policy-holder';
 import { filter } from 'rxjs/operators';
 import { HedgeMe } from 'hardhat/typechain/HedgeMe';
 import { environment } from 'src/environments/environment';
+import moment from 'moment';
 
 @Injectable({
   providedIn: 'root',
@@ -98,5 +99,75 @@ export class HedgeMeService {
       environment.oracleAddres,
       ethers.utils.toUtf8Bytes(environment.jobId)
     );
+  }
+
+  public async requestWeather(): Promise<void> {
+    const address = await this.web3service.signer.getAddress();
+    try {
+      await this.contract.requestWeather(
+        address,
+        moment.now(),
+        ethers.utils.parseUnits('10.25', 2),
+        ethers.utils.parseUnits('-0.54', 2)
+      );
+    } catch (e) {
+      console.error('Transaction failed', e);
+    }
+  }
+
+  public async fundWithLink(): Promise<any> {
+    const network: string = this.web3service.provider.network.name;
+    const LINK_TOKEN_ABI = [
+      {
+        inputs: [
+          { internalType: 'address', name: 'recipient', type: 'address' },
+          { internalType: 'uint256', name: 'amount', type: 'uint256' },
+        ],
+        name: 'transfer',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ];
+
+    //set the LINK token contract address according to the environment
+    let linkContractAddr: string;
+    switch (network) {
+      case 'mainnet':
+        linkContractAddr = '0x514910771af9ca656af840dff83e8264ecf986ca';
+        break;
+      case 'kovan':
+        linkContractAddr = '0xa36085F69e2889c224210F603D836748e7dC0088';
+        break;
+      case 'rinkeby':
+        linkContractAddr = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709';
+        break;
+      case 'goerli':
+        linkContractAddr = '0x326c977e6efc84e512bb9c30f76e30c160ed06fb';
+        break;
+      default:
+        //default to kovan
+        linkContractAddr = '0xa36085F69e2889c224210F603D836748e7dC0088';
+    }
+    //Fund with 1 LINK token
+    const amount = ethers.constants.WeiPerEther;
+
+    //Get signer information
+    const signer = this.web3service.provider.getSigner();
+
+    //Create connection to LINK token contract and initiate the transfer
+    const linkTokenContract = new ethers.Contract(
+      linkContractAddr,
+      LINK_TOKEN_ABI,
+      signer
+    );
+    var result = await linkTokenContract
+      .transfer(this.contractAddress, amount)
+      .then(function (transaction) {
+        console.log(
+          'Contract funded with 1 LINK. Transaction Hash: ',
+          transaction.hash
+        );
+      });
   }
 }

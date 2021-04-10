@@ -15,7 +15,10 @@ async function main() {
 
   // Deploy HedgeMe
   const hedgeMeFactory = await ethers.getContractFactory('HedgeMe');
-  const hedgeMe = await hedgeMeFactory.deploy(30, 1);
+  const hedgeMe = await hedgeMeFactory.deploy(
+    ethers.utils.parseEther('0.0001'),
+    ethers.constants.AddressZero
+  );
 
   await hedgeMe.deployed();
 

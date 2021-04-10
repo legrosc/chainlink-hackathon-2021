@@ -52,4 +52,12 @@ export class HeaderComponent implements OnInit {
   public async setOracle(): Promise<void> {
     await this.hedgeMeService.setContractOracle();
   }
+
+  public async requestWeather(): Promise<void> {
+    await this.hedgeMeService.requestWeather();
+  }
+
+  public async fund(): Promise<void> {
+    await this.hedgeMeService.fundWithLink();
+  }
 }

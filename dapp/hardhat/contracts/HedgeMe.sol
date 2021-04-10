@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @title Handle insurance deposits and payements for the HedgeMe service.
 contract HedgeMe is Ownable, ChainlinkClient {
     // Minimum ether value (in wei) required to register to the insurance
-    uint256 immutable minEthValue;
+    uint256 minEthValue;
     // Minimum number of days that needs to be at the specified temperature for the insurance to trigger
     uint256 immutable minDaysValue;
 
@@ -54,6 +54,10 @@ contract HedgeMe is Ownable, ChainlinkClient {
     {
         oracle = _oracle;
         jobId = _jobId;
+    }
+
+    function setMinEthValue(uint256 _minEthValue) public onlyOwner {
+        minEthValue = _minEthValue;
     }
 
     function register(uint256 amount, PolicyHolder calldata policyHolder)
@@ -103,7 +107,7 @@ contract HedgeMe is Ownable, ChainlinkClient {
      */
     function requestWeather(
         address policyHolderId,
-        int256 _start,
+        uint256 _start,
         int256 _lon,
         int256 _lat
     ) public {
@@ -114,7 +118,7 @@ contract HedgeMe is Ownable, ChainlinkClient {
                 address(this),
                 this.fulfillWeather.selector
             );
-        Chainlink.addInt(req, "start", _start);
+        Chainlink.addUint(req, "start", _start);
         Chainlink.addInt(req, "lon", _lon);
         Chainlink.addInt(req, "lat", _lat);
         bytes32 requestId = sendChainlinkRequestTo(oracle, req, fee);
