@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract HedgeMe is Ownable, ChainlinkClient {
     // Minimum ether value (in wei) required to register to the insurance
     uint256 minEthValue;
+    // Daily amount paid when the insurance triggers
+    uint256 dailyAmount;
     // Minimum number of days that needs to be at the specified temperature for the insurance to trigger
     uint256 immutable minDaysValue;
 
@@ -36,8 +38,13 @@ contract HedgeMe is Ownable, ChainlinkClient {
     event InsuranceFundsUpdated(uint256 newFund);
     event PaidInsurance(address to, uint256 amount);
 
-    constructor(uint256 _minEthValue, address _link) {
+    constructor(
+        uint256 _minEthValue,
+        uint256 _dailyAmount,
+        address _link
+    ) {
         minEthValue = _minEthValue;
+        dailyAmount = _dailyAmount;
         minDaysValue = 4;
 
         if (_link == address(0)) {
@@ -45,19 +52,24 @@ contract HedgeMe is Ownable, ChainlinkClient {
         } else {
             setChainlinkToken(_link);
         }
-        fee = 0.1 * 10**18;
     }
 
-    function setOracleAddress(address _oracle, bytes32 _jobId)
-        public
-        onlyOwner
-    {
+    function setOracleAddress(
+        address _oracle,
+        bytes32 _jobId,
+        uint256 _fee
+    ) public onlyOwner {
         oracle = _oracle;
         jobId = _jobId;
+        fee = _fee;
     }
 
     function setMinEthValue(uint256 _minEthValue) public onlyOwner {
         minEthValue = _minEthValue;
+    }
+
+    function setDailyAmount(uint256 _amount) public onlyOwner {
+        dailyAmount = _amount;
     }
 
     function register(uint256 amount, PolicyHolder calldata policyHolder)
@@ -105,12 +117,7 @@ contract HedgeMe is Ownable, ChainlinkClient {
     /**
      * Initial request
      */
-    function requestWeather(
-        address policyHolderId,
-        uint256 _start,
-        int256 _lon,
-        int256 _lat
-    ) public {
+    function requestWeather(address policyHolderId, uint256 _mockTemp) public {
         console.log("Sending weather request to Oracle...");
         Chainlink.Request memory req =
             buildChainlinkRequest(
@@ -118,9 +125,7 @@ contract HedgeMe is Ownable, ChainlinkClient {
                 address(this),
                 this.fulfillWeather.selector
             );
-        Chainlink.addUint(req, "start", _start);
-        Chainlink.addInt(req, "lon", _lon);
-        Chainlink.addInt(req, "lat", _lat);
+        Chainlink.addUint(req, "start", _mockTemp);
         bytes32 requestId = sendChainlinkRequestTo(oracle, req, fee);
         requests[requestId] = policyHolderId;
     }
@@ -139,8 +144,6 @@ contract HedgeMe is Ownable, ChainlinkClient {
         delete requests[_requestId];
 
         // Check if the policyHolder needs insurance
-        // For now let's use a fixed dailyAmount
-        uint256 dailyAmount = 0.2 ether;
         uint256 insuranceNeededDaysCount = needsInsurance(policyHolderAddress);
         uint256 insurance = dailyAmount * insuranceNeededDaysCount;
         if (

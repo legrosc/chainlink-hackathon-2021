@@ -4,9 +4,10 @@
 
 export const environment = {
   production: false,
-  contractAddress: '0x43c44177661A4cee20775Af41232fd1139d17821',
-  oracleAddres: '0x3F5527271be1101ef53791324Fb8F6172582135a',
-  jobId: 'f1dc351b6a314f619fbe8b2b470c03cd',
+  contractAddress: '0x795Fa5F97Fd35817D636dEe6d74afdF54edec092',
+  oracleAddress: '0x487Df9531edA77473353bfADd817CF9F9f8E08b5',
+  jobId: '7f82f5c9c8c443838eb045f572b628b6',
+  oracleFee: '0.1',
 };
 
 /*

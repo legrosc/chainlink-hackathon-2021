@@ -8,6 +8,7 @@ import { filter } from 'rxjs/operators';
 import { HedgeMe } from 'hardhat/typechain/HedgeMe';
 import { environment } from 'src/environments/environment';
 import moment from 'moment';
+import { SnackbarService } from '@services/snackbar/snackbar.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +25,10 @@ export class HedgeMeService {
    */
   public insuranceFund$: Observable<string> = this.insuranceFundSubject$.asObservable();
 
-  constructor(private readonly web3service: Web3Service) {
+  constructor(
+    private readonly web3service: Web3Service,
+    private readonly snackbarService: SnackbarService
+  ) {
     this.web3service.currentAccount$
       .pipe(filter((c) => c != null))
       .subscribe(() => {
@@ -49,6 +53,15 @@ export class HedgeMeService {
         );
         this.updateInsuranceFund(newValue);
         this.web3service.updateAccountBalance();
+      }
+    );
+
+    this.contract.on(
+      this.contract.filters.PaidInsurance(null, null),
+      (to: string, value: BigNumberish) => {
+        this.snackbarService.showMessage(
+          `${ethers.utils.formatEther(value)} eth were paid to ${to}`
+        );
       }
     );
   }
@@ -96,23 +109,19 @@ export class HedgeMeService {
 
   public async setContractOracle(): Promise<void> {
     await this.contract.setOracleAddress(
-      environment.oracleAddres,
-      ethers.utils.toUtf8Bytes(environment.jobId)
+      environment.oracleAddress,
+      ethers.utils.toUtf8Bytes(environment.jobId),
+      ethers.utils.parseEther(environment.oracleFee)
     );
   }
 
   public async requestWeather(): Promise<void> {
+    console.log('Requesting weather...');
     const address = await this.web3service.signer.getAddress();
-    try {
-      await this.contract.requestWeather(
-        address,
-        moment.now(),
-        ethers.utils.parseUnits('10.25', 2),
-        ethers.utils.parseUnits('-0.54', 2)
-      );
-    } catch (e) {
-      console.error('Transaction failed', e);
-    }
+    await this.contract.requestWeather(
+      address,
+      ethers.BigNumber.from('293294295296297298299')
+    );
   }
 
   public async fundWithLink(): Promise<any> {

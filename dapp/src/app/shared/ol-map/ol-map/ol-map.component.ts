@@ -131,7 +131,7 @@ export class OlMapComponent implements AfterViewInit {
         }),
       ],
       view: new View({
-        projection: 'EPSG:4326',
+        projection: 'EPSG:4326', // WGS84
         center: OSMCoordinate.ToMapCoordinates(this.focusPoint.center),
         zoom: this.focusPoint.zoom,
       }),

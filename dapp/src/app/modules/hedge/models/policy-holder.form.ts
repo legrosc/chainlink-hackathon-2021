@@ -51,12 +51,16 @@ export class PolicyHolderRegistrationForm extends FormGroup {
   }
 
   public get latitude(): BigNumberish {
-    // TODO: parse the value correctly and return it
-    return ethers.utils.parseUnits('10.25', 2);
+    return ethers.utils.parseUnits(
+      parseFloat(this.location.lat).toFixed(14),
+      14
+    );
   }
 
   public get longitude(): BigNumberish {
-    // TODO: parse the value correctly and return it
-    return ethers.utils.parseUnits('-0.54', 2);
+    return ethers.utils.parseUnits(
+      parseFloat(this.location.lon).toFixed(14),
+      14
+    );
   }
 }

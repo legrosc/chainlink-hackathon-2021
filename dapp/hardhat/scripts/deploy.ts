@@ -4,6 +4,7 @@
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import { ethers } from 'hardhat';
+import { HedgeMe, HedgeMe__factory } from '../typechain';
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -14,8 +15,11 @@ async function main() {
   // await hre.run('compile');
 
   // Deploy HedgeMe
-  const hedgeMeFactory = await ethers.getContractFactory('HedgeMe');
-  const hedgeMe = await hedgeMeFactory.deploy(
+  const hedgeMeFactory: HedgeMe__factory = (await ethers.getContractFactory(
+    'HedgeMe'
+  )) as HedgeMe__factory;
+  const hedgeMe: HedgeMe = await hedgeMeFactory.deploy(
+    ethers.utils.parseEther('0.001'),
     ethers.utils.parseEther('0.0001'),
     ethers.constants.AddressZero
   );

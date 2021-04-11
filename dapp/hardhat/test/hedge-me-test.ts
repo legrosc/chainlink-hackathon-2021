@@ -11,10 +11,10 @@ import {
 import { BigNumberish } from '@ethersproject/bignumber';
 import '@nomiclabs/hardhat-waffle';
 import { BigNumber, Wallet } from 'ethers';
-import { doesNotReject } from 'node:assert';
 
 async function deployContract(
-  minValue: BigNumberish
+  minValue: BigNumberish,
+  dailyAmount: BigNumberish
 ): Promise<[HedgeMe, MockOracle]> {
   // Create the mock LINK contract
   const mockLinkFactory = (await ethers.getContractFactory(
@@ -34,11 +34,16 @@ async function deployContract(
   const factory: HedgeMe__factory = (await ethers.getContractFactory(
     'HedgeMe'
   )) as HedgeMe__factory;
-  const hedgeMe: HedgeMe = await factory.deploy(minValue, link.address);
+  const hedgeMe: HedgeMe = await factory.deploy(
+    minValue,
+    dailyAmount,
+    link.address
+  );
   await hedgeMe.deployed();
   await hedgeMe.setOracleAddress(
     mockOracle.address,
-    ethers.utils.toUtf8Bytes('235f8b1eeb364efc83c26d0bef2d0c01')
+    ethers.utils.toUtf8Bytes('235f8b1eeb364efc83c26d0bef2d0c01'), // random bogus jobId
+    ethers.utils.parseEther('0.1')
   );
 
   // Give 1 LINK to the contract
@@ -62,7 +67,10 @@ describe('HedgeMe', function () {
   };
 
   beforeEach(async () => {
-    [contract, mockOracle] = await deployContract(ethers.constants.WeiPerEther);
+    [contract, mockOracle] = await deployContract(
+      ethers.constants.WeiPerEther,
+      ethers.utils.parseEther('0.2')
+    );
   });
 
   it("Should revert if the amounts don't match", async () => {
@@ -132,9 +140,7 @@ describe('HedgeMe', function () {
     // Make the request to the oracle
     await contract.requestWeather(
       wallets[0].address,
-      policyHolder.start,
-      policyHolder.longitude,
-      policyHolder.latitude
+      ethers.BigNumber.from('263273278253271272267')
     );
 
     let requestId: string = await new Promise<string>((resolve) => {
