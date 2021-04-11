@@ -15,15 +15,20 @@
     <ng-template #signerInfo>
       {{ (currentAccount$ | async).address }} -
       {{ (currentAccount$ | async).balanceInEth }} ETH
-      <button mat-button color="primary" (click)="setOracle()">
-        Set oracle
-      </button>
-      <button mat-button color="primary" (click)="requestWeather()">
-        Request weather
-      </button>
-      <button mat-button color="primary" (click)="fund()">
-        Fund contract with link
-      </button>
+      <a
+        *ngIf="this.router.url.includes('home')"
+        mat-button
+        color="primary"
+        routerLink="/admin"
+        >Admin page</a
+      >
+      <a
+        *ngIf="this.router.url.includes('admin')"
+        mat-button
+        color="primary"
+        routerLink="/home"
+        >Home page</a
+      >
     </ng-template>
   </mat-toolbar>
 </header>

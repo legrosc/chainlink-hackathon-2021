@@ -115,12 +115,12 @@ export class HedgeMeService {
     );
   }
 
-  public async requestWeather(): Promise<void> {
-    console.log('Requesting weather...');
+  public async requestWeather(weatherValues: string): Promise<void> {
+    console.log(`Requesting weather (${weatherValues})...`);
     const address = await this.web3service.signer.getAddress();
     await this.contract.requestWeather(
       address,
-      ethers.BigNumber.from('293294295296297298299')
+      ethers.BigNumber.from(weatherValues)
     );
   }
 

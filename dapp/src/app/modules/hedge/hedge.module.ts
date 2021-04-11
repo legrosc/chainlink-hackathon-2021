@@ -11,9 +11,10 @@ import { OlMapModule } from '../../shared/ol-map/ol-map.module';
 import { HeaderComponent } from './header/header.component';
 import { RegisterFormComponent } from './register-form/register-form.component';
 import { InsuranceCounterComponent } from './insurance-counter/insurance-counter.component';
+import { AdminComponent } from './admin/admin.component';
 
 @NgModule({
-  declarations: [HomeComponent, HeaderComponent, RegisterFormComponent, InsuranceCounterComponent],
+  declarations: [HomeComponent, HeaderComponent, RegisterFormComponent, InsuranceCounterComponent, AdminComponent],
   imports: [
     CommonModule,
     HedgeRoutingModule,

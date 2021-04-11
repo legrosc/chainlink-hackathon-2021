@@ -1,0 +1,26 @@
+<app-insurance-counter></app-insurance-counter>
+<div fxLayout="column">
+  <div fxFlexAlign="center">
+    <button mat-button color="primary" (click)="setOracle()">Set oracle</button>
+    <button mat-button color="primary" (click)="fund()">
+      Fund contract with link
+    </button>
+  </div>
+  <div fxLayout="row wrap">
+    <div *ngFor="let day of weatherDays.controls; let i = index">
+      <mat-form-field appearance="outline">
+        <mat-label>Day {{ i + 1 }}</mat-label>
+        <input
+          matInput
+          placeholder="210"
+          [formControl]="weatherDays.controls[i]"
+        />
+        <span matSuffix>Kelvin</span>
+      </mat-form-field>
+    </div>
+
+    <button mat-button color="primary" (click)="requestWeather()">
+      Request weather
+    </button>
+  </div>
+</div>
